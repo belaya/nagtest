@@ -38,16 +38,14 @@ class Reports
 		$sql = "
 			SELECT 
 				s.`NAME` as `typename`,
-				SUM(`b`.`SUMMA`) as `balans`,
-				SUM(`i`.`SUMMA`) as `itog`,
+				SUM(IF(p.`DATA` < :period1,p.`SUMMA`,0)) as `balans`,
+				SUM(IF(p.`DATA` <= :period2,p.`SUMMA`,0)) as `itog`,
 				SUM(IF(t1.`SUMMA` > 0,t1.`SUMMA`,0)) as `incom`,
 				SUM(IF(t1.`SUMMA` < 0,t1.`SUMMA`,0)) as `cost`,
 				SUM(IF(t1.`PAY_ID` = 3,t1.`SUMMA`,0)) as `recalc`
 		 	FROM 
 		 		`services` as s
  			LEFT JOIN `payment` as p ON `p`.`ACNT_ID` = `s`.`ID`
- 			LEFT JOIN (SELECT `SUMMA`, `ID` FROM `payment` WHERE `DATA` < :period1) as `b` ON  `b`.`ID` = `p`.`ID`
- 			LEFT JOIN (SELECT `SUMMA`, `ID` FROM `payment` WHERE `DATA` <= :period2) as `i` ON  `i`.`ID` = `p`.`ID`
  			LEFT JOIN (SELECT `ID`, `SUMMA`, `PAY_ID` FROM `payment` WHERE `DATA` BETWEEN :period1 AND :period2) as `t1` ON `t1`.`ID` = `p`.`ID`
   		";
 
